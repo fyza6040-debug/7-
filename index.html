@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<title>لعبة الكنترول</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>لعبة الكنترول - كب كيك</title>
 
 <style>
 body{
@@ -10,324 +11,126 @@ margin:0;
 font-family:Arial;
 direction:rtl;
 background:#f5e6d3;
+overflow:hidden;
 }
 
-/* عامة */
-.hidden{display:none}
-
-.center{
-display:flex;
+.page{
+display:none;
+height:100vh;
+width:100%;
 justify-content:center;
 align-items:center;
-height:100vh;
+flex-direction:column;
 }
 
-.card{
-background:#d2b48c;
-padding:15px;
-border-radius:15px;
-width:90%;
-max-width:450px;
-text-align:center;
-margin:10px auto;
-}
+.active{display:flex;}
 
 input,button{
 padding:10px;
 margin:5px;
-width:90%;
-border-radius:10px;
-border:none;
-font-size:14px;
+font-size:16px;
 }
 
-button{cursor:pointer}
+#canvas{
+border:2px solid #333;
+background:white;
+touch-action:none;
+}
 
-/* الكنترول */
-.adminTop{
-background:#8b6b4f;
-color:white;
+.topbar{
+position:fixed;
+top:0;
+width:100%;
+background:#d2b48c;
 padding:10px;
 text-align:center;
 font-weight:bold;
-}
-
-/* اللعبة */
-#gameArea{
-background:#c8a97e;
-min-height:100vh;
-padding:10px;
-}
-
-/* لوحة الرسم */
-canvas{
-background:white;
-border-radius:10px;
-touch-action:none;
-width:100%;
-height:300px;
-}
-
-/* أدوات الرسم */
-.tools{
-display:flex;
-justify-content:space-around;
-margin-top:5px;
-}
-
-.smallBtn{
-width:auto;
-padding:8px;
-}
-
-.color{
-width:25px;
-height:25px;
-border-radius:50%;
-display:inline-block;
-cursor:pointer;
-margin:2px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 تسجيل الكنترول -->
-<div id="login" class="center">
-<div class="card">
-<h3>🔐 دخول الكنترول</h3>
-<input id="pass" placeholder="كلمة السر">
-<button onclick="login()">دخول</button>
-</div>
-</div>
+<div class="topbar">🎮 لعبة كب كيك - الكنترول</div>
 
-<!-- 👑 الكنترول -->
-<div id="admin" class="hidden">
-
-<div class="adminTop">
-👑 الكنترول: <span id="adminName">اسمك</span>
+<!-- صفحة الدخول -->
+<div id="loginPage" class="page active">
+<h2>دخول اللاعب</h2>
+<input id="name" placeholder="اكتب اسمك"/>
+<button onclick="joinGame()">دخول</button>
 </div>
 
-<div class="card">
-<h3>⚙️ الإعدادات</h3>
-
-<input id="ctrlName" placeholder="تغيير اسمك">
-<input id="ctrlPass" placeholder="تغيير كلمة السر">
-
-<button onclick="saveSettings()">حفظ التغييرات</button>
-
-<input id="avatar" placeholder="رابط صورتك (اختياري)">
-
-<button onclick="copyPlayerLink()">🔗 نسخ رابط اللاعبين</button>
-
-<button onclick="startGame()">🎮 بدء اللعبة</button>
-<button onclick="showResults()">📊 عرض النتائج</button>
-<button onclick="resetGame()">🔄 إعادة</button>
+<!-- صفحة الانتظار -->
+<div id="waitPage" class="page">
+<h2>انتظار الكنترول يبدأ الجولة...</h2>
 </div>
 
-<div class="card">
-<h3>👥 اللاعبين</h3>
-<div id="playersList"></div>
-</div>
-</div>
-
-<!-- 👥 اللاعبين -->
-<div id="players" class="hidden">
-<div class="card">
-<h3>🎮 تسجيل اللاعب</h3>
-<input id="pName" placeholder="اسمك (إجباري)">
-<input id="pImg" placeholder="صورة (اختياري)">
-<button onclick="join()">دخول</button>
-</div>
-
-<div class="card" id="gameBox" style="display:none">
-
-<h3>🎯 اللعبة بدأت</h3>
-<p id="task">انتظر الكنترول...</p>
-
-<!-- أدوات الرسم -->
-<div class="tools">
-<div onclick="setColor('black')" class="color" style="background:black"></div>
-<div onclick="setColor('red')" class="color" style="background:red"></div>
-<div onclick="setColor('blue')" class="color" style="background:blue"></div>
-<div onclick="setColor('green')" class="color" style="background:green"></div>
-</div>
-
-<div class="tools">
-<button class="smallBtn" onclick="setSize(2)">صغير</button>
-<button class="smallBtn" onclick="setSize(5)">متوسط</button>
-<button class="smallBtn" onclick="setSize(10)">كبير</button>
-</div>
-
-<canvas id="board"></canvas>
-
-<button onclick="clearBoard()">مسح</button>
-<button onclick="saveDraw()">حفظ</button>
-
-</div>
-</div>
-
-<!-- 📊 النتائج -->
-<div id="results" class="hidden">
-<div class="card">
-<h3>📊 النتائج</h3>
-<div id="resultBox"></div>
-<button onclick="backAdmin()">رجوع</button>
-</div>
+<!-- صفحة اللعب -->
+<div id="gamePage" class="page">
+<h3 id="taskText">المهمة</h3>
+<canvas id="canvas" width="300" height="300"></canvas>
+<br/>
+<button onclick="clearCanvas()">مسح</button>
+<button onclick="sendDraw()">إرسال</button>
 </div>
 
 <script>
+let role = "player";
+let canvas = document.getElementById("canvas");
+let ctx = canvas.getContext("2d");
+let drawing = false;
 
-let players=[];
-let password="1234";
-let gameStarted=false;
-
-let ctx, drawing=false;
-let color="black";
-let size=3;
-
-/* 🔐 دخول الكنترول */
-function login(){
-let p=document.getElementById("pass").value;
-if(p!==password){
-alert("كلمة السر خطأ");
-return;
+function show(page){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(page).classList.add("active");
 }
 
-document.getElementById("login").classList.add("hidden");
-document.getElementById("admin").classList.remove("hidden");
+// دخول اللاعب
+function joinGame(){
+let name = document.getElementById("name").value;
+if(!name) return alert("اكتب اسمك");
 
-initAdmin();
+show("waitPage");
+
+// مؤقت تجريبي
+setTimeout(()=>{
+show("gamePage");
+},2000);
 }
 
-/* 👑 إعداد الكنترول */
-function initAdmin(){
-renderPlayers();
-}
-
-/* 💾 حفظ إعدادات */
-function saveSettings(){
-let name=document.getElementById("ctrlName").value;
-let pass=document.getElementById("ctrlPass").value;
-
-if(name) document.getElementById("adminName").innerText=name;
-if(pass) password=pass;
-
-alert("تم الحفظ");
-}
-
-/* 🔗 رابط اللاعبين */
-function copyPlayerLink(){
-let link=window.location.href+"#player";
-navigator.clipboard.writeText(link);
-alert("تم نسخ رابط اللاعبين");
-}
-
-/* 👥 دخول اللاعبين */
-function join(){
-let name=document.getElementById("pName").value;
-if(!name) return;
-
-players.push({
-name:name,
-img:document.getElementById("pImg").value,
-data:null
-});
-
-document.getElementById("players").classList.add("hidden");
-document.getElementById("gameBox").style.display="block";
-
-initCanvas();
-}
-
-/* 🎮 بدء اللعبة */
-function startGame(){
-gameStarted=true;
-document.getElementById("gameBox").style.display="block";
-alert("بدأت اللعبة");
-}
-
-/* 📊 عرض النتائج */
-function showResults(){
-document.getElementById("admin").classList.add("hidden");
-document.getElementById("results").classList.remove("hidden");
-
-let out="";
-players.forEach(p=>{
-out+=`<div class="card">${p.name}<br>${p.data || "لا يوجد"}</div>`;
-});
-
-document.getElementById("resultBox").innerHTML=out;
-}
-
-function backAdmin(){
-document.getElementById("results").classList.add("hidden");
-document.getElementById("admin").classList.remove("hidden");
-}
-
-/* 🔄 إعادة */
-function resetGame(){
-players=[];
-location.reload();
-}
-
-/* 👥 عرض اللاعبين */
-function renderPlayers(){
-let box=document.getElementById("playersList");
-box.innerHTML="";
-
-players.forEach((p,i)=>{
-box.innerHTML+=`<div class="card">${p.name}</div>`;
-});
-}
-
-/* 🎨 الرسم */
-function initCanvas(){
-let canvas=document.getElementById("board");
-ctx=canvas.getContext("2d");
-
-canvas.width=300;
-canvas.height=300;
-
-canvas.addEventListener("mousedown",startDraw);
-canvas.addEventListener("mouseup",stopDraw);
+// رسم
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mouseup",stop);
 canvas.addEventListener("mousemove",draw);
 
-canvas.addEventListener("touchstart",startDraw);
-canvas.addEventListener("touchend",stopDraw);
+canvas.addEventListener("touchstart",start);
+canvas.addEventListener("touchend",stop);
 canvas.addEventListener("touchmove",draw);
-}
 
-function startDraw(e){drawing=true;ctx.beginPath();}
-function stopDraw(){drawing=false;}
+function start(e){drawing=true;}
+function stop(){drawing=false; ctx.beginPath();}
 
 function draw(e){
 if(!drawing) return;
 
-ctx.strokeStyle=color;
-ctx.lineWidth=size;
+let x = e.touches ? e.touches[0].clientX : e.clientX;
+let y = e.touches ? e.touches[0].clientY : e.clientY;
+
+ctx.lineWidth=3;
 ctx.lineCap="round";
-
-let x=e.offsetX || e.touches?.[0].clientX;
-let y=e.offsetY || e.touches?.[0].clientY;
-
 ctx.lineTo(x,y);
 ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
 }
 
-function setColor(c){color=c;}
-function setSize(s){size=s;}
-
-function clearBoard(){
-ctx.clearRect(0,0,300,300);
+function clearCanvas(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
 }
 
-function saveDraw(){
-players[players.length-1].data="🎨 رسم محفوظ";
-alert("تم الحفظ");
+function sendDraw(){
+alert("تم الإرسال (لاحقًا بيرتبط بـ Firebase)");
 }
-
 </script>
 
 </body>
