@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar">
-<head><button onclick="startGame()" style="position:fixed;top:10px;left:10px;z-index:999;padding:10px;background:#d2b48c;border:none;border-radius:8px;">
-▶️ تشغيل اللعبة (كنترول)
-</button>
+<head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>لعبة كب كيك</title>
@@ -35,28 +33,49 @@ font-size:16px;
 #canvas{
 border:2px solid #333;
 background:white;
+touch-action:none;
+}
+
+.topbar{
+position:fixed;
+top:0;
+width:100%;
+background:#d2b48c;
+padding:10px;
+font-weight:bold;
 }
 </style>
 </head>
 
 <body>
 
+<div class="topbar">🎮 لعبة كب كيك</div>
+
+<!-- LOGIN -->
 <div id="login" class="page active">
-<h2>دخول اللعبة</h2>
+<h2>دخول اللاعب</h2>
 <input id="name" placeholder="اسمك"/>
 <button onclick="join()">دخول</button>
 </div>
 
+<!-- WAIT -->
 <div id="wait" class="page">
-<h2>انتظر الكنترول</h2>
+<h2>⏳ انتظر الكنترول يبدأ اللعبة</h2>
 </div>
 
+<!-- GAME -->
 <div id="game" class="page">
-<h2>ارسم الآن</h2>
+<h2>✏️ ارسم الآن</h2>
 <canvas id="canvas" width="300" height="300"></canvas>
 <br/>
 <button onclick="clearCanvas()">مسح</button>
 <button onclick="send()">إرسال</button>
+</div>
+
+<!-- CONTROL -->
+<div id="control" class="page">
+<h2>👑 الكنترول</h2>
+<button onclick="startGame()">▶️ تشغيل اللعبة</button>
 </div>
 
 <script type="module">
@@ -65,6 +84,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 🔥 Firebase (لا تغيّرين شيء هنا الآن)
 const firebaseConfig = {
 apiKey: "PUT_API_KEY",
 authDomain: "cupcake-games-42925.firebaseapp.com",
@@ -77,38 +97,49 @@ appId: "PUT_APP_ID"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// ===== UI =====
 function show(id){
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+// ===== دخول اللاعب =====
 window.join = async function(){
 let name = document.getElementById("name").value;
 if(!name) return alert("اكتب اسمك");
 
 await addDoc(collection(db,"players"),{
-name,
+name:name,
 time:Date.now()
 });
 
 show("wait");
 }
 
+// ===== مراقبة حالة اللعبة =====
 onSnapshot(doc(db,"game","room"),(snap)=>{
 let d = snap.data();
 if(!d) return;
 
-if(d.state==="start"){
+if(d.state === "start"){
 show("game");
 }
 });
 
+// ===== الكنترول =====
 window.startGame = async function(){
+try{
 await setDoc(doc(db,"game","room"),{
-state:"start"
+state:"start",
+time:Date.now()
 });
+alert("تم تشغيل اللعبة 🎮");
+}catch(e){
+alert("خطأ: " + e.message);
+}
 }
 
+// ===== الرسم =====
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 let draw=false;
@@ -134,7 +165,7 @@ await addDoc(collection(db,"drawings"),{
 img:canvas.toDataURL(),
 time:Date.now()
 });
-alert("تم الإرسال");
+alert("تم الإرسال 🚀");
 }
 
 </script>
