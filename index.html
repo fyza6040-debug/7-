@@ -7,18 +7,17 @@
 <style>
 body{
   font-family: Arial;
-  text-align: center;
-  background: #e9f6f6;
+  text-align:center;
+  background:#dff3f3;
 }
 
-#intro, #gameBox{
+#admin,#player,#intro,#game{
   display:none;
 }
 
 img{
-  width:260px;
+  width:250px;
   border-radius:15px;
-  margin:10px;
 }
 
 button{
@@ -32,129 +31,113 @@ button{
   border-radius:50%;
   cursor:pointer;
   margin:5px;
-  border:2px solid transparent;
-}
-
-.avatar:hover{
-  border:2px solid #333;
-}
-
-#profile{
-  margin:10px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 👤 تسجيل اللاعب -->
-<div id="start">
-  <h1>مرحباً بك في وصف الصور الغامضة</h1>
+<div id="admin">
+  <h1>🧠 لوحة الكنترول</h1>
+  <button onclick="createGame()">إنشاء لعبة</button>
+  <p id="link"></p>
+</div>
 
-  <input id="playerName" placeholder="اكتب اسمك">
+<div id="player">
 
-  <p>اختاري أفاتار (اختياري):</p>
+  <h2>🎮 وصف الصور الغامضة</h2>
 
-  <img class="avatar" onclick="selectAvatar(this)" src="https://i.imgur.com/1X5Q9Zb.png">
-  <img class="avatar" onclick="selectAvatar(this)" src="https://i.imgur.com/8QZ2v8l.jpg">
-  <img class="avatar" onclick="selectAvatar(this)" src="https://i.imgur.com/3g7nmJC.jpg">
+  <input id="name" placeholder="اكتب اسمك">
+
+  <p>اختار أفاتار (اختياري):</p>
+
+  <img class="avatar" onclick="setAvatar(this)" src="https://i.imgur.com/1X5Q9Zb.png">
+  <img class="avatar" onclick="setAvatar(this)" src="https://i.imgur.com/3g7nmJC.jpg">
 
   <br><br>
 
   <button onclick="goIntro()">التالي</button>
 </div>
 
-<!-- 📖 الشرح -->
 <div id="intro">
-  <h2>📖 شرح اللعبة</h2>
+  <h2 id="hi"></h2>
 
-  <p>
-    ستظهر لك صور غامضة وفلسفية.<br><br>
-    اكتب وصفك للصورة بأفضل أسلوب ممكن.<br><br>
-    كلما كان وصفك أجمل وأدق، تزيد فرصك في التميز.<br><br>
-    استعد للإبداع ✨
-  </p>
+  <p>✨ اكتب وصفك للصور الغامضة بأفضل أسلوب إبداعي</p>
 
-  <button onclick="startGame()">ابدأ اللعب</button>
+  <button onclick="startGame()">ابدأ</button>
 </div>
 
-<!-- 🎮 اللعبة -->
-<div id="gameBox">
-
-  <div id="profile">
-    <img id="myAvatar" width="60" style="border-radius:50%">
-    <p id="myName"></p>
-  </div>
+<div id="game">
 
   <h3 id="welcome"></h3>
 
-  <img id="img" src="https://i.imgur.com/9pXj4vK.jpg">
+  <img id="img" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470">
 
   <p>اكتب وصف الصورة:</p>
-
-  <textarea rows="5" cols="30"></textarea>
+  <textarea></textarea>
 
   <br><br>
 
-  <button onclick="nextImg()">التالي</button>
-
+  <button onclick="next()">التالي</button>
 </div>
 
 <script>
 
-let selectedAvatar = "";
-let i = 0;
+let avatar="";
+let i=0;
+let name="";
 
-let images = [
-  "https://i.imgur.com/9pXj4vK.jpg",
-  "https://i.imgur.com/3g7nmJC.jpg",
-  "https://i.imgur.com/8QZ2v8l.jpg",
-  "https://i.imgur.com/1Q9Zx1a.jpg",
-  "https://i.imgur.com/7kL9m2B.jpg"
+let images=[
+  "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+  "https://images.unsplash.com/photo-1520975916090-3105956dac38",
+  "https://images.unsplash.com/photo-1518837695005-2083093ee35b",
+  "https://images.unsplash.com/photo-1470770903676-69b98201ea1c"
 ];
 
-// اختيار أفاتار
-function selectAvatar(img){
-  selectedAvatar = img.src;
+window.onload=function(){
+  let url=new URLSearchParams(window.location.search);
+
+  if(url.get("play")=="1"){
+    document.getElementById("player").style.display="block";
+  }else{
+    document.getElementById("admin").style.display="block";
+  }
 }
 
-// الانتقال للشرح
-function goIntro(){
-  let name = document.getElementById("playerName").value;
+function createGame(){
+  let link=window.location.href.split("?")[0]+"?play=1";
+  document.getElementById("link").innerText=link;
+}
 
-  if(name == ""){
-    alert("اكتبي اسمك");
+function setAvatar(img){
+  avatar=img.src;
+}
+
+function goIntro(){
+  name=document.getElementById("name").value;
+
+  if(name==""){
+    alert("اكتب اسمك");
     return;
   }
 
-  document.getElementById("start").style.display="none";
+  document.getElementById("player").style.display="none";
   document.getElementById("intro").style.display="block";
 
-  document.getElementById("myName").innerText = name;
+  document.getElementById("hi").innerText="أهلاً " + name;
 }
 
-// بدء اللعبة
 function startGame(){
   document.getElementById("intro").style.display="none";
-  document.getElementById("gameBox").style.display="block";
-
-  let name = document.getElementById("playerName").value;
-
-  document.getElementById("welcome").innerText = "أهلاً " + name;
-
-  document.getElementById("myAvatar").src =
-    selectedAvatar || "https://i.imgur.com/8QZ2v8l.jpg";
+  document.getElementById("game").style.display="block";
+  document.getElementById("welcome").innerText=name;
 }
 
-// تغيير الصور
-function nextImg(){
-
+function next(){
   i++;
-  if(i >= images.length){
-    i = 0;
-  }
-
-  document.getElementById("img").src = images[i];
+  if(i>=images.length) i=0;
+  document.getElementById("img").src=images[i];
 }
 
 </script>
