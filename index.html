@@ -30,60 +30,59 @@ margin:5px;
 font-size:16px;
 }
 
+.topbar{
+position:fixed;
+top:0;
+width:100%;
+background:#d2b48c;
+padding:10px;
+font-weight:bold;
+}
+
 #controlBtn{
 position:fixed;
 top:10px;
 left:10px;
 z-index:999;
 padding:10px;
-background:#d2b48c;
-border:none;
-border-radius:8px;
+background:#fff;
+border:1px solid #333;
+cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<!-- زر الكنترول -->
-<button onclick="quickTest()" style="position:fixed;top:10px;left:10px;z-index:999;padding:10px;">
-▶️ اختبار الكنترول
-</button>
+<div class="topbar">🎮 لعبة كب كيك</div>
 
-<!-- دخول -->
+<button id="controlBtn" onclick="startGame()">▶️ تشغيل اللعبة</button>
+
+<!-- LOGIN -->
 <div id="login" class="page active">
 <h2>دخول اللاعب</h2>
 <input id="name" placeholder="اسمك"/>
 <button onclick="join()">دخول</button>
 </div>
 
-<!-- انتظار -->
+<!-- WAIT -->
 <div id="wait" class="page">
-<h2>انتظر الكنترول</h2>
+<h2>⏳ انتظر الكنترول</h2>
 </div>
 
-<!-- لعبة -->
+<!-- GAME -->
 <div id="game" class="page">
-<h2>ارسم الآن</h2>
-<canvas id="canvas" width="300" height="300"></canvas>
+<h2>✏️ ارسم الآن</h2>
+
+<canvas id="canvas" width="300" height="300" style="border:2px solid #333;background:white;"></canvas>
+
 <br/>
 <button onclick="clearCanvas()">مسح</button>
 <button onclick="send()">إرسال</button>
 </div>
 
 <script type="module">
-window.quickTest = async function(){
-alert("زر الكنترول شغال");
 
-try{
-await setDoc(doc(db,"game","room"),{
-state:"start"
-});
-alert("تم إرسال start إلى Firebase");
-}catch(e){
-alert("خطأ Firebase: " + e.message);
-}
-}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -105,6 +104,7 @@ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+// دخول اللاعب
 window.join = async function(){
 let name = document.getElementById("name").value;
 if(!name) return alert("اكتب اسمك");
@@ -117,6 +117,7 @@ time:Date.now()
 show("wait");
 }
 
+// مراقبة حالة اللعبة
 onSnapshot(doc(db,"game","room"),(snap)=>{
 let d = snap.data();
 if(d?.state === "start"){
@@ -124,6 +125,7 @@ show("game");
 }
 });
 
+// الكنترول
 window.startGame = async function(){
 await setDoc(doc(db,"game","room"),{
 state:"start",
@@ -132,32 +134,74 @@ time:Date.now()
 alert("بدأت اللعبة 🎮");
 }
 
-let canvas = document.getElementById("canvas");
-let ctx = canvas.getContext("2d");
-let draw=false;
+// الرسم
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-canvas.onmousedown=()=>draw=true;
-canvas.onmouseup=()=>draw=false;
+let drawing = false;
 
-canvas.onmousemove=(e)=>{
-if(!draw) return;
-ctx.lineWidth=3;
-ctx.lineTo(e.offsetX,e.offsetY);
+function startDraw(e){
+drawing = true;
+ctx.beginPath();
+}
+
+function stopDraw(){
+drawing = false;
+ctx.beginPath();
+}
+
+function draw(e){
+if(!drawing) return;
+
+ctx.lineWidth = 3;
+ctx.lineCap = "round";
+
+const rect = canvas.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+
+ctx.lineTo(x,y);
 ctx.stroke();
 ctx.beginPath();
-ctx.moveTo(e.offsetX,e.offsetY);
-};
+ctx.moveTo(x,y);
+}
 
-window.clearCanvas=function(){
+canvas.addEventListener("mousedown", startDraw);
+canvas.addEventListener("mouseup", stopDraw);
+canvas.addEventListener("mouseleave", stopDraw);
+canvas.addEventListener("mousemove", draw);
+
+// لمس الجوال
+canvas.addEventListener("touchstart", ()=>drawing=true);
+canvas.addEventListener("touchend", ()=>drawing=false);
+canvas.addEventListener("touchmove", function(e){
+let rect = canvas.getBoundingClientRect();
+let touch = e.touches[0];
+
+const x = touch.clientX - rect.left;
+const y = touch.clientY - rect.top;
+
+if(!drawing) return;
+
+ctx.lineWidth = 3;
+ctx.lineCap = "round";
+
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
+});
+
+window.clearCanvas = function(){
 ctx.clearRect(0,0,300,300);
 }
 
-window.send=async function(){
+window.send = async function(){
 await addDoc(collection(db,"drawings"),{
 img:canvas.toDataURL(),
 time:Date.now()
 });
-alert("تم الإرسال");
+alert("تم الإرسال 🚀");
 }
 
 </script>
