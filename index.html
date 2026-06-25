@@ -4,34 +4,46 @@
 <meta charset="UTF-8">
 <title>وصف الصور الغامضة</title>
 </head>
+
 <body style="text-align:center;font-family:Arial">
+
 <div id="start">
-<h1>مرحباً بكم في وصف الصور الغامضة</h1>
-<input id="playerName" placeholder="اكتب اسمك">
+  <h1>مرحباً بكم في وصف الصور الغامضة</h1>
 
-ابدأ
+  <input id="playerName" placeholder="اكتب اسمك">
 
+  <br><br>
+
+  <button onclick="startGame()">ابدأ</button>
 </div>
+
 <div id="game" style="display:none">
-<h2 id="welcome"></h2>
-<p>اكتب وصفك للصورة:</p>
-<textarea rows="5" cols="30"></textarea>
+  <h2 id="welcome"></h2>
 
-إرسال
+  <p>اكتب وصفك للصورة:</p>
 
+  <textarea rows="5" cols="30"></textarea>
+
+  <br><br>
+
+  <button>إرسال</button>
 </div>
+
 <script>
 function startGame() {
-let name = document.getElementById("playerName").value;
-if(name==""){
-alert("اكتب اسمك أولاً");
-return;
-}
-document.getElementById("start").style.display="none";
-document.getElementById("game").style.display="block";
-document.getElementById("welcome").innerHTML =
-"أهلاً " + name;
+  let name = document.getElementById("playerName").value;
+
+  if(name == ""){
+    alert("اكتب اسمك أولاً");
+    return;
+  }
+
+  document.getElementById("start").style.display = "none";
+  document.getElementById("game").style.display = "block";
+
+  document.getElementById("welcome").innerText = "أهلاً " + name;
 }
 </script>
+
 </body>
 </html>
