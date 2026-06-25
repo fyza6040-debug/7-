@@ -47,7 +47,6 @@ z-index:999;
 padding:10px;
 background:#fff;
 border:1px solid #333;
-cursor:pointer;
 }
 </style>
 </head>
@@ -99,6 +98,7 @@ appId: "PUT_APP_ID"
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// تغيير الصفحات
 function show(id){
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
@@ -117,21 +117,26 @@ time:Date.now()
 show("wait");
 }
 
-// مراقبة حالة اللعبة
+// مراقبة اللعبة (مهم جدًا)
 onSnapshot(doc(db,"game","room"),(snap)=>{
 let d = snap.data();
-if(d?.state === "start"){
+
+if(d && d.state === "start"){
 show("game");
 }
 });
 
-// الكنترول
+// تشغيل اللعبة (كنترول)
 window.startGame = async function(){
+try{
 await setDoc(doc(db,"game","room"),{
 state:"start",
 time:Date.now()
 });
-alert("بدأت اللعبة 🎮");
+alert("تم تشغيل اللعبة 🎮");
+}catch(e){
+alert("Firebase Error: " + e.message);
+}
 }
 
 // الرسم
@@ -140,17 +145,11 @@ const ctx = canvas.getContext("2d");
 
 let drawing = false;
 
-function startDraw(e){
-drawing = true;
-ctx.beginPath();
-}
+canvas.addEventListener("mousedown", ()=>drawing=true);
+canvas.addEventListener("mouseup", ()=>drawing=false);
+canvas.addEventListener("mouseleave", ()=>drawing=false);
 
-function stopDraw(){
-drawing = false;
-ctx.beginPath();
-}
-
-function draw(e){
+canvas.addEventListener("mousemove", function(e){
 if(!drawing) return;
 
 ctx.lineWidth = 3;
@@ -164,24 +163,20 @@ ctx.lineTo(x,y);
 ctx.stroke();
 ctx.beginPath();
 ctx.moveTo(x,y);
-}
-
-canvas.addEventListener("mousedown", startDraw);
-canvas.addEventListener("mouseup", stopDraw);
-canvas.addEventListener("mouseleave", stopDraw);
-canvas.addEventListener("mousemove", draw);
+});
 
 // لمس الجوال
 canvas.addEventListener("touchstart", ()=>drawing=true);
 canvas.addEventListener("touchend", ()=>drawing=false);
+
 canvas.addEventListener("touchmove", function(e){
+if(!drawing) return;
+
 let rect = canvas.getBoundingClientRect();
 let touch = e.touches[0];
 
 const x = touch.clientX - rect.left;
 const y = touch.clientY - rect.top;
-
-if(!drawing) return;
 
 ctx.lineWidth = 3;
 ctx.lineCap = "round";
