@@ -12,9 +12,10 @@ direction:rtl;
 background:#f5e6d3;
 }
 
-/* عامة */
+/* إخفاء */
 .hidden{display:none}
 
+/* تمركز */
 .center{
 display:flex;
 justify-content:center;
@@ -22,6 +23,7 @@ align-items:center;
 height:100vh;
 }
 
+/* كرت */
 .card{
 background:#d2b48c;
 padding:15px;
@@ -32,6 +34,7 @@ text-align:center;
 margin:10px auto;
 }
 
+/* مدخلات */
 input,button{
 padding:10px;
 margin:5px;
@@ -43,7 +46,7 @@ font-size:14px;
 
 button{cursor:pointer}
 
-/* الكنترول */
+/* كنترول */
 .adminTop{
 background:#8b6b4f;
 color:white;
@@ -53,13 +56,13 @@ font-weight:bold;
 }
 
 /* اللعبة */
-#gameArea{
+#playersArea{
 background:#c8a97e;
 min-height:100vh;
 padding:10px;
 }
 
-/* لوحة الرسم */
+/* رسم */
 canvas{
 background:white;
 border-radius:10px;
@@ -68,32 +71,25 @@ width:100%;
 height:300px;
 }
 
-/* أدوات الرسم */
+/* أدوات */
 .tools{
 display:flex;
 justify-content:space-around;
 margin-top:5px;
 }
 
-.smallBtn{
-width:auto;
-padding:8px;
-}
-
 .color{
 width:25px;
 height:25px;
 border-radius:50%;
-display:inline-block;
 cursor:pointer;
-margin:2px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 تسجيل الكنترول -->
+<!-- 🔐 كنترول دخول -->
 <div id="login" class="center">
 <div class="card">
 <h3>🔐 دخول الكنترول</h3>
@@ -106,47 +102,41 @@ margin:2px;
 <div id="admin" class="hidden">
 
 <div class="adminTop">
-👑 الكنترول: <span id="adminName">اسمك</span>
+👑 لوحة الكنترول
 </div>
 
 <div class="card">
 <h3>⚙️ الإعدادات</h3>
 
-<input id="ctrlName" placeholder="تغيير اسمك">
+<input id="ctrlName" placeholder="تغيير اسم الكنترول">
 <input id="ctrlPass" placeholder="تغيير كلمة السر">
 
-<button onclick="saveSettings()">حفظ التغييرات</button>
-
-<input id="avatar" placeholder="رابط صورتك (اختياري)">
-
+<button onclick="saveSettings()">حفظ</button>
 <button onclick="copyPlayerLink()">🔗 نسخ رابط اللاعبين</button>
 
-<button onclick="startGame()">🎮 بدء اللعبة</button>
-<button onclick="showResults()">📊 عرض النتائج</button>
+<button onclick="showPlayers()">👥 عرض اللاعبين</button>
 <button onclick="resetGame()">🔄 إعادة</button>
 </div>
 
-<div class="card">
-<h3>👥 اللاعبين</h3>
 <div id="playersList"></div>
-</div>
 </div>
 
 <!-- 👥 اللاعبين -->
-<div id="players" class="hidden">
+<div id="playersArea" class="hidden">
+
 <div class="card">
-<h3>🎮 تسجيل اللاعب</h3>
-<input id="pName" placeholder="اسمك (إجباري)">
+<h3>🎮 دخول اللاعب</h3>
+
+<input id="pName" placeholder="اسمك">
 <input id="pImg" placeholder="صورة (اختياري)">
 <button onclick="join()">دخول</button>
 </div>
 
-<div class="card" id="gameBox" style="display:none">
+<div id="gameBox" class="hidden card">
 
-<h3>🎯 اللعبة بدأت</h3>
-<p id="task">انتظر الكنترول...</p>
+<h3>🎯 اللعبة</h3>
+<p>ارسم أو اكتب حسب الدور</p>
 
-<!-- أدوات الرسم -->
 <div class="tools">
 <div onclick="setColor('black')" class="color" style="background:black"></div>
 <div onclick="setColor('red')" class="color" style="background:red"></div>
@@ -154,38 +144,32 @@ margin:2px;
 <div onclick="setColor('green')" class="color" style="background:green"></div>
 </div>
 
-<div class="tools">
-<button class="smallBtn" onclick="setSize(2)">صغير</button>
-<button class="smallBtn" onclick="setSize(5)">متوسط</button>
-<button class="smallBtn" onclick="setSize(10)">كبير</button>
-</div>
-
 <canvas id="board"></canvas>
 
-<button onclick="clearBoard()">مسح</button>
+<button onclick="clearCanvas()">مسح</button>
 <button onclick="saveDraw()">حفظ</button>
 
 </div>
-</div>
 
-<!-- 📊 النتائج -->
-<div id="results" class="hidden">
-<div class="card">
-<h3>📊 النتائج</h3>
-<div id="resultBox"></div>
-<button onclick="backAdmin()">رجوع</button>
-</div>
 </div>
 
 <script>
 
-let players=[];
 let password="1234";
-let gameStarted=false;
+let players=[];
+let currentColor="black";
+let drawing=false;
+let ctx;
 
-let ctx, drawing=false;
-let color="black";
-let size=3;
+/* 🚀 تشغيل تلقائي (أهم شيء) */
+window.onload=function(){
+if(window.location.hash==="#player"){
+document.getElementById("login").classList.add("hidden");
+document.getElementById("playersArea").classList.remove("hidden");
+}else{
+document.getElementById("login").classList.remove("hidden");
+}
+}
 
 /* 🔐 دخول الكنترول */
 function login(){
@@ -197,92 +181,38 @@ return;
 
 document.getElementById("login").classList.add("hidden");
 document.getElementById("admin").classList.remove("hidden");
-
-initAdmin();
 }
 
-/* 👑 إعداد الكنترول */
-function initAdmin(){
-renderPlayers();
-}
-
-/* 💾 حفظ إعدادات */
+/* ⚙️ حفظ إعدادات */
 function saveSettings(){
-let name=document.getElementById("ctrlName").value;
-let pass=document.getElementById("ctrlPass").value;
-
-if(name) document.getElementById("adminName").innerText=name;
-if(pass) password=pass;
-
+let newPass=document.getElementById("ctrlPass").value;
+if(newPass) password=newPass;
 alert("تم الحفظ");
 }
 
 /* 🔗 رابط اللاعبين */
 function copyPlayerLink(){
-let link=window.location.href+"#player";
+let link=window.location.href.split('#')[0] + "#player";
 navigator.clipboard.writeText(link);
 alert("تم نسخ رابط اللاعبين");
 }
 
-/* 👥 دخول اللاعبين */
+/* 👥 دخول لاعب */
 function join(){
 let name=document.getElementById("pName").value;
-if(!name) return;
+if(!name){
+alert("اكتب اسمك");
+return;
+}
 
-players.push({
-name:name,
-img:document.getElementById("pImg").value,
-data:null
-});
+players.push({name:name,data:null});
 
-document.getElementById("players").classList.add("hidden");
-document.getElementById("gameBox").style.display="block";
+document.getElementById("gameBox").classList.remove("hidden");
 
 initCanvas();
 }
 
-/* 🎮 بدء اللعبة */
-function startGame(){
-gameStarted=true;
-document.getElementById("gameBox").style.display="block";
-alert("بدأت اللعبة");
-}
-
-/* 📊 عرض النتائج */
-function showResults(){
-document.getElementById("admin").classList.add("hidden");
-document.getElementById("results").classList.remove("hidden");
-
-let out="";
-players.forEach(p=>{
-out+=`<div class="card">${p.name}<br>${p.data || "لا يوجد"}</div>`;
-});
-
-document.getElementById("resultBox").innerHTML=out;
-}
-
-function backAdmin(){
-document.getElementById("results").classList.add("hidden");
-document.getElementById("admin").classList.remove("hidden");
-}
-
-/* 🔄 إعادة */
-function resetGame(){
-players=[];
-location.reload();
-}
-
-/* 👥 عرض اللاعبين */
-function renderPlayers(){
-let box=document.getElementById("playersList");
-box.innerHTML="";
-
-players.forEach((p,i)=>{
-box.innerHTML+=`<div class="card">${p.name}</div>`;
-});
-}
-
-/* 🎨 الرسم */
+/* 🎨 إعداد الرسم */
 function initCanvas(){
 let canvas=document.getElementById("board");
 ctx=canvas.getContext("2d");
@@ -290,23 +220,23 @@ ctx=canvas.getContext("2d");
 canvas.width=300;
 canvas.height=300;
 
-canvas.addEventListener("mousedown",startDraw);
-canvas.addEventListener("mouseup",stopDraw);
-canvas.addEventListener("mousemove",draw);
+canvas.onmousedown=start;
+canvas.onmouseup=stop;
+canvas.onmousemove=draw;
 
-canvas.addEventListener("touchstart",startDraw);
-canvas.addEventListener("touchend",stopDraw);
-canvas.addEventListener("touchmove",draw);
+canvas.ontouchstart=start;
+canvas.ontouchend=stop;
+canvas.ontouchmove=draw;
 }
 
-function startDraw(e){drawing=true;ctx.beginPath();}
-function stopDraw(){drawing=false;}
+function start(e){drawing=true;ctx.beginPath();}
+function stop(){drawing=false;}
 
 function draw(e){
 if(!drawing) return;
 
-ctx.strokeStyle=color;
-ctx.lineWidth=size;
+ctx.strokeStyle=currentColor;
+ctx.lineWidth=3;
 ctx.lineCap="round";
 
 let x=e.offsetX || e.touches?.[0].clientX;
@@ -316,16 +246,33 @@ ctx.lineTo(x,y);
 ctx.stroke();
 }
 
-function setColor(c){color=c;}
-function setSize(s){size=s;}
+function setColor(c){currentColor=c;}
 
-function clearBoard(){
+function clearCanvas(){
 ctx.clearRect(0,0,300,300);
 }
 
 function saveDraw(){
-players[players.length-1].data="🎨 رسم محفوظ";
+if(players.length>0){
+players[players.length-1].data="🎨 رسم";
 alert("تم الحفظ");
+}
+}
+
+/* 🔄 عرض اللاعبين */
+function showPlayers(){
+let box=document.getElementById("playersList");
+box.innerHTML="";
+
+players.forEach(p=>{
+box.innerHTML+=`<div class="card">${p.name}</div>`;
+});
+}
+
+/* 🔄 إعادة */
+function resetGame(){
+players=[];
+location.reload();
 }
 
 </script>
