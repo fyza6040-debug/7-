@@ -1,18 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
 <title>وصف الصور الغامضة</title>
 </head>
-<body>
-
+<body style="text-align:center;font-family:Arial">
+<div id="start">
 <h1>مرحباً بكم في وصف الصور الغامضة</h1>
+<input id="playerName" placeholder="اكتب اسمك">
 
-<input placeholder="اكتب اسمك">
+ابدأ
 
-<br><br>
+</div>
+<div id="game" style="display:none">
+<h2 id="welcome"></h2>
+<p>اكتب وصفك للصورة:</p>
+<textarea rows="5" cols="30"></textarea>
 
-<button>ابدأ</button>
+إرسال
 
+</div>
+<script>
+function startGame() {
+let name = document.getElementById("playerName").value;
+if(name==""){
+alert("اكتب اسمك أولاً");
+return;
+}
+document.getElementById("start").style.display="none";
+document.getElementById("game").style.display="block";
+document.getElementById("welcome").innerHTML =
+"أهلاً " + name;
+}
+</script>
 </body>
 </html>
