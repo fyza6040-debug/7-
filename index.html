@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>لعبة كب كيك</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+direction:rtl;
+background:#f5e6d3;
+text-align:center;
+overflow:hidden;
+}
+
+.page{
+display:none;
+height:100vh;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+.active{display:flex;}
+
+.topbar{
+position:fixed;
+top:0;
+width:100%;
+background:#d2b48c;
+padding:10px;
+font-weight:bold;
+z-index:10;
+}
+
+#controlBtn{
+position:fixed;
+top:10px;
+left:10px;
+z-index:999;
+padding:10px;
+background:white;
+border:1px solid #333;
+}
+
+canvas{
+border:2px solid #333;
+background:white;
+touch-action:none;
+}
+
+#taskBox{
+margin:10px;
+font-size:18px;
+background:#fff;
+padding:10px;
+border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">🎮 لعبة كب كيك</div>
+
+<button id="controlBtn" onclick="startGame()">▶️ تشغيل اللعبة</button>
+
+<!-- LOGIN -->
+<div id="login" class="page active">
+<h2>دخول اللاعب</h2>
+<input id="name" placeholder="اسمك"/>
+<button onclick="join()">دخول</button>
+</div>
+
+<!-- WAIT -->
+<div id="wait" class="page">
+<h2>⏳ انتظر الكنترول</h2>
+</div>
+
+<!-- GAME -->
+<div id="game" class="page">
+
+<div id="taskBox">✏️ المطلوب: ارسم شكل حر</div>
+
+<canvas id="canvas" width="300" height="300"></canvas>
+
+<br/>
+<button onclick="clearCanvas()">مسح</button>
+<button onclick="send()">إرسال</button>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, doc, setDoc, onSnapshot }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "PUT_API_KEY",
+authDomain: "cupcake-games-42925.firebaseapp.com",
+projectId: "cupcake-games-42925",
+storageBucket: "cupcake-games-42925.appspot.com",
+messagingSenderId: "PUT_ID",
+appId: "PUT_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+function show(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// دخول اللاعب
+window.join = async function(){
+let name = document.getElementById("name").value;
+if(!name) return alert("اكتب اسمك");
+
+await addDoc(collection(db,"players"),{
+name,
+time:Date.now()
+});
+
+show("wait");
+}
+
+// مراقبة اللعبة
+onSnapshot(doc(db,"game","room"),(snap)=>{
+let d = snap.data();
+
+if(d?.state === "start"){
+show("game");
+}
+});
+
+// تشغيل الكنترول + تغيير التحدي
+window.startGame = async function(){
+await setDoc(doc(db,"game","room"),{
+state:"start",
+task:"ارسم أي شكل تحبه",
+time:Date.now()
+});
+
+document.getElementById("taskBox").innerText = "✏️ المطلوب: ارسم أي شكل تحبه";
+alert("بدأت اللعبة 🎮");
+}
+
+// الرسم (ثابت وما يتحرك)
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.style.position = "relative";
+
+let drawing = false;
+
+function startDraw(e){
+drawing = true;
+ctx.beginPath();
+}
+
+function stopDraw(){
+drawing = false;
+ctx.beginPath();
+}
+
+function draw(e){
+if(!drawing) return;
+
+const rect = canvas.getBoundingClientRect();
+const x = e.clientX - rect.left;
+const y = e.clientY - rect.top;
+
+ctx.lineWidth = 3;
+ctx.lineCap = "round";
+
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
+}
+
+canvas.addEventListener("mousedown",startDraw);
+canvas.addEventListener("mouseup",stopDraw);
+canvas.addEventListener("mouseleave",stopDraw);
+canvas.addEventListener("mousemove",draw);
+
+// الجوال
+canvas.addEventListener("touchstart",startDraw);
+canvas.addEventListener("touchend",stopDraw);
+
+canvas.addEventListener("touchmove",(e)=>{
+if(!drawing) return;
+
+const rect = canvas.getBoundingClientRect();
+const t = e.touches[0];
+
+const x = t.clientX - rect.left;
+const y = t.clientY - rect.top;
+
+ctx.lineTo(x,y);
+ctx.stroke();
+ctx.beginPath();
+ctx.moveTo(x,y);
+});
+
+window.clearCanvas = function(){
+ctx.clearRect(0,0,300,300);
+}
+
+window.send = async function(){
+await addDoc(collection(db,"drawings"),{
+img:canvas.toDataURL(),
+time:Date.now()
+});
+alert("تم الإرسال 🚀");
+}
+
+</script>
+
+</body>
+</html>
