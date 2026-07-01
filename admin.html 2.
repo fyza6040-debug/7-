@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة الكنترول</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>👩‍💼 لوحة التحكم</h1>
+
+    <!-- تسجيل دخول -->
+    <div id="loginBox" class="box">
+      <h3>أدخل كلمة السر</h3>
+      <input type="password" id="password" placeholder="كلمة السر">
+      <button onclick="checkPassword()">دخول</button>
+      <p id="loginMsg"></p>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div id="controlPanel" style="display:none;" class="box">
+
+      <h3>🎮 التحكم باللعبة</h3>
+
+      <button onclick="startGame()">بدء اللعبة</button>
+      <button onclick="stopGame()">إيقاف اللعبة</button>
+
+      <hr>
+
+      <button onclick="lockGame()">قفل دخول اللاعبين</button>
+      <button onclick="unlockGame()">فتح الدخول</button>
+
+      <hr>
+
+      <p id="status">الحالة: غير نشط</p>
+
+    </div>
+
+  </div>
+
+  <script>
+    const ADMIN_PASSWORD = "77777771";
+
+    function checkPassword() {
+      let pass = document.getElementById("password").value;
+
+      if(pass === ADMIN_PASSWORD) {
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("controlPanel").style.display = "block";
+      } else {
+        document.getElementById("loginMsg").innerText = "كلمة السر خطأ ❌";
+      }
+    }
+
+    function startGame() {
+      localStorage.setItem("gameStatus", "started");
+      document.getElementById("status").innerText = "الحالة: اللعبة بدأت 🎮";
+    }
+
+    function stopGame() {
+      localStorage.setItem("gameStatus", "stopped");
+      document.getElementById("status").innerText = "الحالة: اللعبة توقفت ⛔";
+    }
+
+    function lockGame() {
+      localStorage.setItem("gameLock", "locked");
+      document.getElementById("status").innerText = "الحالة: الدخول مقفول 🔒";
+    }
+
+    function unlockGame() {
+      localStorage.setItem("gameLock", "open");
+      document.getElementById("status").innerText = "الحالة: الدخول مفتوح 🔓";
+    }
+  </script>
+
+</body>
+</html>
