@@ -1,79 +1,80 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <title>لوحة الكنترول</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>كنترول كب كيك VIP🤭</title>
+
+<style>
+body{
+  font-family:Arial;
+  text-align:center;
+  direction:rtl;
+  background:#111;
+  color:white;
+}
+
+.card{
+  margin-top:120px;
+}
+
+button{
+  padding:15px 25px;
+  margin:10px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.open{
+  background:#2ecc71;
+  color:white;
+}
+
+.close{
+  background:#e74c3c;
+  color:white;
+}
+
+h1{
+  color:#ffcc70;
+}
+</style>
 </head>
+
 <body>
 
-  <div class="container">
+<div class="card">
+  <h1>🎮 كنترول كب كيك VIP🤭</h1>
 
-    <h1>👩‍💼 لوحة التحكم</h1>
+  <button class="open" onclick="openGame()">فتح اللعبة</button>
+  <button class="close" onclick="closeGame()">إغلاق اللعبة</button>
 
-    <!-- تسجيل دخول -->
-    <div id="loginBox" class="box">
-      <h3>أدخل كلمة السر</h3>
-      <input type="password" id="password" placeholder="كلمة السر">
-      <button onclick="checkPassword()">دخول</button>
-      <p id="loginMsg"></p>
-    </div>
+  <p id="status"></p>
+</div>
 
-    <!-- لوحة التحكم -->
-    <div id="controlPanel" style="display:none;" class="box">
+<script>
 
-      <h3>🎮 التحكم باللعبة</h3>
+function openGame(){
+  localStorage.setItem("gameStatus","open");
+  document.getElementById("status").innerText = "✅ اللعبة مفتوحة";
+}
 
-      <button onclick="startGame()">بدء اللعبة</button>
-      <button onclick="stopGame()">إيقاف اللعبة</button>
+function closeGame(){
+  localStorage.setItem("gameStatus","closed");
+  document.getElementById("status").innerText = "🔒 اللعبة مقفولة";
+}
 
-      <hr>
+// عرض الحالة الحالية
+let status = localStorage.getItem("gameStatus");
 
-      <button onclick="lockGame()">قفل دخول اللاعبين</button>
-      <button onclick="unlockGame()">فتح الدخول</button>
+if(status === "open"){
+  document.getElementById("status").innerText = "✅ اللعبة مفتوحة";
+}else{
+  document.getElementById("status").innerText = "🔒 اللعبة مقفولة";
+}
 
-      <hr>
-
-      <p id="status">الحالة: غير نشط</p>
-
-    </div>
-
-  </div>
-
-  <script>
-    const ADMIN_PASSWORD = "77777771";
-
-    function checkPassword() {
-      let pass = document.getElementById("password").value;
-
-      if(pass === ADMIN_PASSWORD) {
-        document.getElementById("loginBox").style.display = "none";
-        document.getElementById("controlPanel").style.display = "block";
-      } else {
-        document.getElementById("loginMsg").innerText = "كلمة السر خطأ ❌";
-      }
-    }
-
-    function startGame() {
-      localStorage.setItem("gameStatus", "started");
-      document.getElementById("status").innerText = "الحالة: اللعبة بدأت 🎮";
-    }
-
-    function stopGame() {
-      localStorage.setItem("gameStatus", "stopped");
-      document.getElementById("status").innerText = "الحالة: اللعبة توقفت ⛔";
-    }
-
-    function lockGame() {
-      localStorage.setItem("gameLock", "locked");
-      document.getElementById("status").innerText = "الحالة: الدخول مقفول 🔒";
-    }
-
-    function unlockGame() {
-      localStorage.setItem("gameLock", "open");
-      document.getElementById("status").innerText = "الحالة: الدخول مفتوح 🔓";
-    }
-  </script>
+</script>
 
 </body>
 </html>
