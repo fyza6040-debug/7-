@@ -2,92 +2,88 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>لعبة 🧁</title>
+<title>كب كيك VIP🤭</title>
 
 <style>
-
 body{
-margin:0;
-font-family:Arial;
-direction:rtl;
-background:#f5e6d3;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#74ebd5,#acb6e5);
+  text-align:center;
+  direction:rtl;
+  color:white;
 }
 
-.page{
-display:none;
-flex-direction:column;
-align-items:center;
-}
-
-.active{
-display:flex;
+.box{
+  margin-top:120px;
 }
 
 input{
-padding:10px;
-width:220px;
-margin:10px;
-font-size:18px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  width:200px;
+  margin:5px;
 }
 
 button{
-padding:10px 20px;
-font-size:18px;
-cursor:pointer;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#ff4f91;
+  color:white;
+  cursor:pointer;
 }
 
+h1{
+  font-size:40px;
+}
 </style>
-
 </head>
 
 <body>
 
-<div id="login" class="page active">
-
-<h1>🎮 لعبة كب كيك</h1>
-
-<input id="playerName" placeholder="اكتب اسمك">
-
-<button onclick="login()">
-دخول
-</button>
-
-</div>
-
-<div id="wait" class="page">
-
-<h2>
-⏳ انتظر الكنترول يبدأ اللعبة
-</h2>
-
-</div>
+<div id="content"></div>
 
 <script>
+// 🔐 التحقق من حالة اللعبة
+let status = localStorage.getItem("gameStatus");
 
-function login(){
+if(status !== "open"){
+  document.getElementById("content").innerHTML = `
+    <h1>🔒 اللعبة مقفولة حالياً</h1>
+    <p>انتظري فتح الكنترول</p>
+  `;
+}else{
+  document.getElementById("content").innerHTML = `
+    <div class="box">
+      <h1>كب كيك VIP🤭</h1>
+      <p>ادخلي بياناتك للعب</p>
 
-let name=document.getElementById("playerName").value;
+      <input id="name" placeholder="اسمك">
 
-if(name==""){
+      <br>
 
-alert("اكتب اسمك");
-
-return;
-
+      <button onclick="join()">دخول</button>
+    </div>
+  `;
 }
 
-document.getElementById("login").classList.remove("active");
+function join(){
+  let name = document.getElementById("name").value;
 
-document.getElementById("wait").classList.add("active");
+  if(name === ""){
+    alert("اكتبي اسمك");
+    return;
+  }
 
+  localStorage.setItem("playerName", name);
+
+  document.body.innerHTML = `
+    <h1>مرحباً ${name} 👋</h1>
+    <p>اللعبة بدأت قريباً 🎮</p>
+  `;
 }
-
 </script>
 
 </body>
