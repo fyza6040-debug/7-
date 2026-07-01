@@ -54,7 +54,6 @@ h1{
 </div>
 
 <script>
-
 function openGame(){
   localStorage.setItem("gameStatus","open");
   document.getElementById("status").innerText = "✅ اللعبة مفتوحة";
@@ -65,7 +64,6 @@ function closeGame(){
   document.getElementById("status").innerText = "🔒 اللعبة مقفولة";
 }
 
-// عرض الحالة الحالية
 let status = localStorage.getItem("gameStatus");
 
 if(status === "open"){
@@ -73,7 +71,6 @@ if(status === "open"){
 }else{
   document.getElementById("status").innerText = "🔒 اللعبة مقفولة";
 }
-
 </script>
 
 </body>
