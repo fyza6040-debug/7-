@@ -49,6 +49,7 @@ h1{
 // 🔐 التحقق من حالة اللعبة
 let status = localStorage.getItem("gameStatus");
 
+// إذا اللعبة مقفولة
 if(status !== "open"){
   document.getElementById("content").innerHTML = `
     <h1>🔒 اللعبة مقفولة حالياً</h1>
@@ -58,7 +59,7 @@ if(status !== "open"){
   document.getElementById("content").innerHTML = `
     <div class="box">
       <h1>كب كيك VIP🤭</h1>
-      <p>ادخلي بياناتك للعب</p>
+      <p>ادخلي اسمك</p>
 
       <input id="name" placeholder="اسمك">
 
@@ -81,7 +82,7 @@ function join(){
 
   document.body.innerHTML = `
     <h1>مرحباً ${name} 👋</h1>
-    <p>اللعبة بدأت قريباً 🎮</p>
+    <p>تم الدخول بنجاح 🎮</p>
   `;
 }
 </script>
